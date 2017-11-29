@@ -1,0 +1,2 @@
+	strip and groundplane: copper (sigma=5.8e7)
+	substrate: epsr=3.4 

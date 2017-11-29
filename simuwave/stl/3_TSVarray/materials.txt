@@ -1,0 +1,3 @@
+	TSV: copper (sigma=5.8e7)
+	dioxide: ??	
+	silicon: epsr=11.9, sigma=10 
