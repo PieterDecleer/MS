@@ -63,6 +63,9 @@ void initGrid(Grid *g, PyObject *ipt){
 	my_alloc( (*g).diffhz , Nx*Ny*(Nz-1)     , double );
 	my_alloc( (*g).chz    , Nx*Ny*(Nz-1)     , double );
 
+	
+	
+
 
 	// set electric-field update coefficients 	
 	for(i=0; i<Nx; i++){  

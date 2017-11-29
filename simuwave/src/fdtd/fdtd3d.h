@@ -9,6 +9,9 @@
 // vacuum parameters  
 #define Z0 376.730313461
 #define c0 299792458.0
+#define Hbar	(1.0545718e-34)
+#define Qe	(1.60217662e-19)
+#define	Me	(9.10938356e-31)
 
 
 // memory allocation macro
@@ -89,6 +92,51 @@ typedef struct Subgrid Subgrid;
 #define Chz_(I,J,K)    (*g).sg[s].chz[ ((I)*Ny+J)*(Nz-1)+K]
 
 
+struct Schrodgrid {
+	
+	double *pr, *prv, *prvv;	   // real part of electron wavefunction at previous steps
+	double *pi, *piv, *pivv;	   // imag part of electron wavefunction at previous steps
+	double *lpx, *lpy, *lpz;	   // laplacian term update coefficient (positive)
+	double *ppx, *ppy, *ppz;	   // potential term update coefficient (positive) -- for potential Vs AND qE terms
+	double *vs;			   // static potential for the electron
+	double *dxs, *dys, *dzs;	   // schrodinger grid steps -- may be the same as for Maxwell
+	double *ex, *ey, *ez;		   // electric field unknowns
+	double *hx, *hy, *hz;		   // magnetic field unknowns
+	double *jx, *jy, *jz		   // Quantum current unknowns
+	double *cex, *cey, *cez;           // electric-field capacity update coefficient
+	double *chx, *chy, *chz;           // magnetic-field capacity update coefficient
+	double nx, ny, nz, nt, it	   //
+	double dt_s			   // timestep for Schrodinger, may be the same as for Maxwell
+
+}
+typedef struct Schrodgrid Schrodgrid;
+
+// macros for accessing properties of the Schrodgrid
+#define Pr(I,J,K)     (*g).srg[s].pr[  ((I)*Ny+J)*(Nz)+K]		// new macros start here
+#define Prv(I,J,K)    (*g).srg[s].prv[ ((I)*Ny+J)*(Nz)+K]		// beware of indices - ask!
+#define Prvv(I,J,K)   (*g).srg[s].prvv[((I)*Ny+J)*(Nz)+K]
+#define Pi(I,J,K)     (*g).srg[s].pr[  ((I)*Ny+J)*(Nz)+K]
+#define Piv(I,J,K)    (*g).srg[s].prv[ ((I)*Ny+J)*(Nz)+K]
+#define Pivv(I,J,K)   (*g).srg[s].prvv[((I)*Ny+J)*(Nz)+K]
+#define Lpx(I,J,K)    (*g).srg[s].lpx[((I)*Ny+J)*(Nz)+K]
+#define Lpy(I,J,K)    (*g).srg[s].lpy[((I)*Ny+J)*(Nz)+K]
+#define Lpz(I,J,K)    (*g).srg[s].lpz[((I)*Ny+J)*(Nz)+K]
+#define Ppx(I,J,K)    (*g).srg[s].ppx[((I)*Ny+J)*(Nz)+K]
+#define Ppy(I,J,K)    (*g).srg[s].ppy[((I)*Ny+J)*(Nz)+K]
+#define Ppz(I,J,K)    (*g).srg[s].ppz[((I)*Ny+J)*(Nz)+K]
+#define Vs(I,J,K)     (*g).srg[s].vs[((I)*Ny+J)*(Nz)+K]
+#define Dxs(I)	      (*g).srg[s].dx[I]
+#define Dys(J)	      (*g).srg[s].dy[J]
+#define Dzs(K)	      (*g).srg[s].dz[K]
+#define Exs(I,J,K)    (*g).srg[s].ex[  ((I)*(Ny+1)+J)*(Nz+1)+K]
+#define Eys(I,J,K)    (*g).srg[s].ey[  ((I)*(Ny+1)+J)*(Nz+1)+K]
+#define Ezs(I,J,K)    (*g).srg[s].ez[  ((I)*(Ny+1)+J)*(Nz+1)+K]
+#define Cexs(I,J,K)   (*g).sg[s].cex[ ((I)*(Ny-1)+J)*(Nz-1)+K]
+#define Ceys(I,J,K)   (*g).sg[s].cey[ ((I)*(Ny)+J)*(Nz-1)+K]
+#define Cezs(I,J,K)   (*g).sg[s].cez[ ((I)*(Ny-1)+J)*(Nz)+K]
+#define Chxs(I,J,K)   (*g).sg[s].chx[ ((I)*Ny+J)*Nz+K]
+#define Chys(I,J,K)   (*g).sg[s].chy[ ((I)*(Ny-1)+J)*Nz+K]
+#define Chzs(I,J,K)   (*g).sg[s].chz[ ((I)*Ny+J)*(Nz-1)+K]
 
 
 struct Grid {
@@ -98,14 +146,16 @@ struct Grid {
 	double *diffhx, *diffhy, *diffhz;  // auxiliary time-difference magnetic-field unknowns 
 	double *cex, *cey, *cez;           // electric-field capacity update coefficient
 	double *chx, *chy, *chz;           // magnetic-field capacity update coefficient
-	double *sex, *sey, *sez;           // electric-field conductivity update coefficient
+	double *sex, *sey, *sez;           // electric-field conductivity update coefficient	
+
 	double *dx, *dy, *dz;              // primary-grid steps
 	double dtau;                       // Minkowski time step (c*dt)
 	int nx, ny, nz, nt, it;            // number of cells, number of iterations, and current iteration  
 	int bc[6];                         // boundary conditions          	
 	int npml[6];                       // number of PML layers  
 	int nsub;                          // number of subgrids  
-	Subgrid *sg;                       // subgrids		   	    
+	Subgrid *sg;                       // subgrids
+	Schrodgrid *srg;		   // Schrodinger grid		   	    
 }; 
 typedef struct Grid Grid;           
 
@@ -149,6 +199,8 @@ typedef struct Grid Grid;
 #define Hz(I,J,K)     (*g).hz[    ((I)*Ny+J)*(Nz-1)+K]
 #define DiffHz(I,J,K) (*g).diffhz[((I)*Ny+J)*(Nz-1)+K]
 #define Chz(I,J,K)    (*g).chz[   ((I)*Ny+J)*(Nz-1)+K]
+
+
 
 
 
@@ -211,8 +263,13 @@ void freeMemoryAdhie(void);
 
 void initVisualization(Grid *g, PyObject *ipt); 
 void visualize(Grid *g); 
-void freeMemoryVisualization(void); 
+void freeMemoryVisualization(void);
 
+void initElectron(Grid *g, PyObject *ipt);	// new function prototypes start here
+void initPotential(Grid *g, PyObject *ipt);	// PyObject needed for the definition of potential position, potential strenght, and effective mass
+
+void updatePr(Grid *g);
+void updatePi(Grid *g);
 
 
 #endif   // matches #ifndef _FDTD3D_H in the beginning of the header file
