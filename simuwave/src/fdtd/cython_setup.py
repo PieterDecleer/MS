@@ -2,7 +2,7 @@ from distutils.core import setup, Extension
 from Cython.Build import cythonize 
 
 ext = Extension(name='cython_wrapper',
-		sources=['fdtd3d.c','grid.c','source.c','sensor.c','pml.c','visualize.c','adhie.c','cython_wrapper.pyx'],
+		sources=['fdtd3d.c','grid.c','source.c','sensor.c','pml.c','visualize.c','adhie.c','cython_wrapper.pyx','schrodgrid.c'],
 		extra_compile_args=['-O3'])
 
 setup(ext_modules=cythonize(ext))

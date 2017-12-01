@@ -9,6 +9,7 @@ PyObject* run_fdtd(PyObject *ipt){
 	Grid *g; my_alloc(g,1,Grid);
 	
 	initGrid(g,ipt);
+	initSchrodgrid(g, ipt);
 	initAdhie1(g,ipt);
 	initPml(g,ipt);
 	initAdhie2(g); 
