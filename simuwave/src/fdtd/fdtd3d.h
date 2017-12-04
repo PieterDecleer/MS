@@ -151,8 +151,7 @@ struct Grid {
 	double *diffhx, *diffhy, *diffhz;  // auxiliary time-difference magnetic-field unknowns 
 	double *cex, *cey, *cez;           // electric-field capacity update coefficient
 	double *chx, *chy, *chz;           // magnetic-field capacity update coefficient
-	double *sex, *sey, *sez;           // electric-field conductivity update coefficient	
-
+	double *sex, *sey, *sez;           // electric-field conductivity update coefficient
 	double *dx, *dy, *dz;              // primary-grid steps
 	double dtau;                       // Minkowski time step (c*dt)
 	int nx, ny, nz, nt, it;            // number of cells, number of iterations, and current iteration  
@@ -160,7 +159,7 @@ struct Grid {
 	int npml[6];                       // number of PML layers  
 	int nsub, nsr;                     // number of subgrids and number of schrodinger grids  
 	Subgrid *sg;                       // subgrids
-	Schrodgrid *srg;		   // Schrodinger grid		   	    
+	Schrodgrid *srg;		   // Schrodinger grids		   	    
 }; 
 typedef struct Grid Grid;           
 

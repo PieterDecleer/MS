@@ -31,7 +31,7 @@ void initSubgrids(Grid *g, PyObject *ipt){
 	  my_alloc( (*g).sg[s].dz, Nz_ , double );  
 	  for(i=0; i<Nx_; i++){ Dx1_(i) = 1e-3 * PyFloat_AS_DOUBLE( PyList_GET_ITEM( py_Dx_, (Py_ssize_t) i ) ); }   // (m)
 	  for(j=0; j<Ny_; j++){ Dy1_(j) = 1e-3 * PyFloat_AS_DOUBLE( PyList_GET_ITEM( py_Dy_, (Py_ssize_t) j ) ); } 
-      for(k=0; k<Nz_; k++){ Dz1_(k) = 1e-3 * PyFloat_AS_DOUBLE( PyList_GET_ITEM( py_Dz_, (Py_ssize_t) k ) ); }   
+      	  for(k=0; k<Nz_; k++){ Dz1_(k) = 1e-3 * PyFloat_AS_DOUBLE( PyList_GET_ITEM( py_Dz_, (Py_ssize_t) k ) ); }   
 	  Py_DECREF(py_steps);   
 
 	  // implicitization direction

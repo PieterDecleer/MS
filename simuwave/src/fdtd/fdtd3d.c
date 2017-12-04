@@ -9,19 +9,20 @@ PyObject* run_fdtd(PyObject *ipt){
 	Grid *g; my_alloc(g,1,Grid);
 	
 	initGrid(g,ipt);
+	printf("Grid initialized ...\n");
 	initSchrodgrid(g, ipt);
 	initAdhie1(g,ipt);
 	initPml(g,ipt);
 	initAdhie2(g); 
 	initSource(g,ipt);	 	
-	initSensor(g,ipt);	
+	initSensor(g,ipt);		
 	initVisualization(g,ipt);  	
-	
 	printf("Timestepping ...\n"); 
 
 	for (It=0; It<Nt; It++){                         
 	
 		printf("%i/%i\n",It,Nt); 		
+		electronSnapshot(g);
 		
 		updateDiffH(g);
 		updateDiffHpml(g);		
@@ -30,6 +31,9 @@ PyObject* run_fdtd(PyObject *ipt){
 		updateHhard(g); 					
 
 		//updateSubgrids(g);
+		
+		updatePr(g);
+		updatePi(g);
 
 		updateDiffE(g);
 		//fine2coarse(g);
@@ -42,7 +46,8 @@ PyObject* run_fdtd(PyObject *ipt){
 		//coarse2fine(g);	
 		
 		updateSensor(g); 
-		visualize(g);	
+		visualize(g);
+			
 		
 	}
 
@@ -52,7 +57,8 @@ PyObject* run_fdtd(PyObject *ipt){
 	PyObject *out = sensorC2Py(g);
 	freeMemorySource(); 
 	freeMemoryPml();
-	freeMemoryAdhie();     
+	freeMemoryAdhie();
+	freeMemorySchrodgrid(g);     
 	freeMemoryGrid(g);   
 
 	return out; 

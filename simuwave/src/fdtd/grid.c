@@ -45,7 +45,7 @@ void initGrid(Grid *g, PyObject *ipt){
 	my_alloc( (*g).diffex , Nx*(Ny-1)*(Nz-1) , double ); 	
 	my_alloc( (*g).cex    , Nx*(Ny-1)*(Nz-1) , double ); 
 	my_alloc( (*g).sex    , Nx*(Ny-1)*(Nz-1) , double ); 
-    my_alloc( (*g).ey     , (Nx+1)*Ny*(Nz+1) , double ); 
+    	my_alloc( (*g).ey     , (Nx+1)*Ny*(Nz+1) , double ); 
 	my_alloc( (*g).diffey , (Nx-1)*Ny*(Nz-1) , double ); 	
 	my_alloc( (*g).cey    , (Nx-1)*Ny*(Nz-1) , double );
 	my_alloc( (*g).sey    , (Nx-1)*Ny*(Nz-1) , double );
@@ -62,7 +62,7 @@ void initGrid(Grid *g, PyObject *ipt){
 	my_alloc( (*g).hz     , Nx*Ny*(Nz-1)     , double );
 	my_alloc( (*g).diffhz , Nx*Ny*(Nz-1)     , double );
 	my_alloc( (*g).chz    , Nx*Ny*(Nz-1)     , double );
-
+	my_alloc( (*g).srg    , 1     , Schrodgrid );
 	
 	
 
@@ -222,7 +222,7 @@ void updateH(Grid *g){
 
 
 void freeMemoryGrid(Grid *g){     
-                            
+                        free((*g).srg);    
 	                free((*g).chz); free((*g).diffhz); free((*g).hz);	
 	                free((*g).chy); free((*g).diffhy); free((*g).hy); 		
 	                free((*g).chx); free((*g).diffhx); free((*g).hx);     	

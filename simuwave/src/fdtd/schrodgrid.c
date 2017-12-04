@@ -2,13 +2,14 @@
 #include <math.h>
 
 void initSchrodgrid(Grid *g, PyObject *ipt){
+	printf("Initialization of the Schrodinger grid started...\n");
 	//definition of the reduced mass
-	static double mr = 0.023*Me;
+	static double mr = (0.023*Me);
 	
 	// three spatial indices and one subgrid index
 	int i,j,k,s;
 
-	// number of subgrids
+	// number of Schrodinger grids
 	Nsr = 1;	// If multiple grids are used with subgridding, this has to be obtained from the GUI
 	
 	for (s=0; s<Nsr; s++) {
@@ -17,18 +18,25 @@ void initSchrodgrid(Grid *g, PyObject *ipt){
 		Nxs = Nx;
 		Nys = Ny;
 		Nzs = Nz;
+		int xc = Nxs/2;							// center of harmonic oscillator in x direction
+		int yc = Nys/2;							// center of harmonic oscillator in y direction
+		int zc = Nys/2;							// center of harmonic oscillator in z direction
 
 		// redefine timestep to normal time, not Minkowski time
 		Dts = Dtau/c0;
-
+		
 		// cell dimensions
 		my_alloc( (*g).srg[s].dxs, Nxs, double);
 		my_alloc( (*g).srg[s].dys, Nys, double);
 		my_alloc( (*g).srg[s].dzs, Nzs, double);
-		for (i=0; i<Nxs; i++) Dxs(i) = Dx1(i);
-		for (j=0; j<Nys; j++) Dys(j) = Dy1(j);
-		for (k=0; k<Nzs; k++) Dzs(k) = Dz1(k);
- 
+		for (i=0; i<Nxs; i++) Dxs(i) = Dx1(xc);
+		for (j=0; j<Nys; j++) Dys(j) = Dy1(yc);
+		for (k=0; k<Nzs; k++) Dzs(k) = Dz1(zc);
+
+		printf("Cell size in center = %e x %e x %e\n",Dxs(xc),Dys(yc),Dzs(zc));
+ 		
+		Dts = 0.1/((Hbar/mr)*(12/(Dx1(xc)*Dx1(xc))));
+
 		// dynamically allocate memoryfor the field variables and the update coefficients
 		my_alloc( (*g).srg[s].pr     , Nxs*Nys*Nzs     , double );	// Ask for indices
 		my_alloc( (*g).srg[s].prv    , Nxs*Nys*Nzs     , double );
@@ -46,23 +54,21 @@ void initSchrodgrid(Grid *g, PyObject *ipt){
 		
 		// set laplacian and potential update coefficients
 		for (i=1; i<Nxs; i++){
-			Lpx(i) = Hbar*Dts/(mr*Dxs(i)*Dxs(i-1));		// for a non uniform grid check what has to be used!!!
+			Lpx(i) = Hbar*Dts/(mr*Dxs(xc)*Dxs(xc));		// for a non uniform grid check what has to be used!!!
 			Ppx(i) = 2*Dts/Hbar;
 		}
 		for (j=1; j<Nys; j++){
-			Lpy(j) = Hbar*Dts/(mr*Dys(j)*Dys(j-1));		// for a non uniform grid check what has to be used!!!
+			Lpy(j) = Hbar*Dts/(mr*Dys(yc)*Dys(yc));		// for a non uniform grid check what has to be used!!!
 			Ppy(i) = 2*Dts/Hbar;
 		}
 		for (k=1; k<Nzs; k++){
-			Lpz(k) = Hbar*Dts/(mr*Dzs(k)*Dzs(k-1));		// for a non uniform grid check what has to be used!!!
+			Lpz(k) = Hbar*Dts/(mr*Dzs(zc)*Dzs(zc));		// for a non uniform grid check what has to be used!!!
 			Ppz(k) = 2*Dts/Hbar;
 		}
 
 		// set static potential strength and initial wavefunction
-		static double omega = 2*3.1415*c0/(950e-9);		// static potential angular frequency
-		int xc = Nxs/2;							// center of harmonic oscillator in x direction
-		int yc = Nys/2;							// center of harmonic oscillator in y direction
-		int zc = Nys/2;							// center of harmonic oscillator in z direction
+		static double omega = (2*M_PI*(c0))/(950e-9);		// static potential angular frequency
+
 		
 		double xdist(int pos, int xc){
 			if (pos>xc)
@@ -89,29 +95,89 @@ void initSchrodgrid(Grid *g, PyObject *ipt){
 		for (i=0; i<Nxs; i++){
 			for (j=0; j<Nys; j++){
 				for (k=0; k<Nzs; k++){
-					double distance_squared = pow(xdist(i, xc), 2.0) +
-											  pow(ydist(j, yc), 2.0) +
-											  pow(zdist(k, zc), 2.0);
+					double distance_squared = pow((i-xc)*Dxs(xc), 2.0) + pow((j-yc)*Dys(yc), 2.0) + pow((k-zc)*Dzs(zc), 2.0);
 					Vs(i,j,k) = 0.5*mr*pow(omega, 2.0)*distance_squared;
-					Pr(i,j,k) = pow(mr*omega/(M_PI*Hbar),0.75)*exp(mr*omega*distance_squared/(2.0*Hbar));
-					Prvv(i,j,k) = pow(mr*omega/(M_PI*Hbar),0.75)*exp(mr*omega*distance_squared/(2.0*Hbar)); 		
+					Pr(i,j,k) = pow(mr*omega/(M_PI*Hbar),0.75)*exp(-mr*omega*distance_squared/(2.0*Hbar));
+					Prvv(i,j,k) = pow(mr*omega/(M_PI*Hbar),0.75)*exp(-mr*omega*distance_squared/(2.0*Hbar)); 		
 		}}}
 
-	
-	char basename[80] = "elProb_init";
-	char filename[100];
-	FILE *snapshot;
-	if (1){
-		sprintf(filename, "%s_%d", basename, s);
-		snapshot = fopen(filename, "w");	
-		for (i=0; i < Nxs; i++){
-			for (j=0; i < Nys; j++){
-				fprintf(snapshot, "%e\t", pow(Pr(i,j,zc), 2.0));
-		} fprintf (snapshot, "\n"); }
-		fclose(snapshot);	
-	}
+		
+		FILE *f = fopen("file.txt","w");
+		if (f == NULL){
+			printf("Error opening file!\n");
+			exit(1);
+		}			
+		for (i=0; i<Nxs; i++){
+			for (j =0; j<Nys; j++){
+				fprintf(f,"%e\t", Vs(i,j,zc));
+		} fprintf(f,"\n");}		
+		fclose(f);
+		
 	}
 	return;
+}
+
+void updatePr(Grid *g){
+	
+    int i,j,k,s;
+	for (s=0;s<Nsr;s++){
+		for (i = 1; i < Nxs - 1; i++){
+		    for (j = 1; j < Nys - 1; j++){
+		        for (k = 1; k < Nzs - 1; k++){
+		            Prv(i,j,k) = Pr(i,j,k);     // update Prv to time n-1/2
+		            Pr(i,j,k) = Prvv(i,j,k)     // update Pr to time n+1/2
+		                        - Lpx(i) * (Pi(i + 1,j,k) - 2 * Pi(i,j,k) + Pi(i - 1,j,k))
+		                        - Lpy(j) * (Pi(i,j + 1,k) - 2 * Pi(i,j,k) + Pi(i,j - 1,k))
+		                        - Lpz(k) * (Pi(i,j,k + 1) - 2 * Pi(i,j,k) + Pi(i,j,k - 1))
+		                        + Ppx(i) * Vs(i,j,k) * Pi(i,j,k);
+		            Prvv(i,j,k) = Prv(i,j,k);   // update Prvv to time n-1/2
+		        }
+		    }
+		}
+	}
+    return;
+}
+
+void updatePi(Grid *g){
+    int i,j,k,s;
+	for (s=0;s<Nsr;s++){
+		for (i = 1; i < Nxs - 1; i++){
+		    for (j = 1; j < Nys - 1; j++){
+		        for (k = 1; k < Nzs - 1; k++){
+		            Piv(i,j,k) = Pi(i,j,k);     // update Piv to time n-1/2
+		            Pi(i,j,k) = Pivv(i,j,k)     // update Pi to time n+1/2
+		                        + Lpx(i) * (Prv(i + 1,j,k) - 2 * Prv(i,j,k) + Prv(i - 1,j,k))
+		                        + Lpy(j) * (Prv(i,j + 1,k) - 2 * Prv(i,j,k) + Prv(i,j - 1,k))
+		                        + Lpz(k) * (Prv(i,j,k + 1) - 2 * Prv(i,j,k) + Prv(i,j,k - 1))
+		                        - Ppx(i) * Vs(i,j,k) * Prv(i,j,k);
+		            Pivv(i,j,k) = Piv(i,j,k);   // update Pivv to time n-1/2
+		        }
+		    }
+		}
+	}
+    return;
+}
+
+int frame = 0;
+
+void electronSnapshot(Grid *g){
+	int i,j,s;	
+	FILE *snapshot;
+	char f[100];
+
+	if (It % 100 == 0){
+		printf("snapshot taken\n");
+		for (s=0;s<Nsr;s++){
+			sprintf(f, "snapshot_%d.txt", frame++);
+			snapshot = fopen(f, "w");
+			int zc = Nys/2;			
+			for (i=0; i<Nxs; i++){
+				for (j =0; j<Nys; j++){
+					fprintf(snapshot,"%e\t", pow(Pr(i,j,zc),2.0));
+			} fprintf(snapshot,"\n");}		
+			fclose(snapshot);
+		}
+	}
 }
 
 void freeMemorySchrodgrid(Grid *g){
