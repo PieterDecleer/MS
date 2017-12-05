@@ -91,14 +91,20 @@ void initSchrodgrid(Grid *g, PyObject *ipt){
 				return zdist(pos+1, zc)+Dzs(pos);
 			else return 0.0;
 		}
-		
+		double coeff = pow(mr*omega/(M_PI*Hbar),0.75);
+		double coeff2 = mr*omega/(2.0*Hbar);
 		for (i=0; i<Nxs; i++){
 			for (j=0; j<Nys; j++){
 				for (k=0; k<Nzs; k++){
 					double distance_squared = pow((i-xc)*Dxs(xc), 2.0) + pow((j-yc)*Dys(yc), 2.0) + pow((k-zc)*Dzs(zc), 2.0);
 					Vs(i,j,k) = 0.5*mr*pow(omega, 2.0)*distance_squared;
-					Pr(i,j,k) = pow(mr*omega/(M_PI*Hbar),0.75)*exp(-mr*omega*distance_squared/(2.0*Hbar));
-					Prvv(i,j,k) = pow(mr*omega/(M_PI*Hbar),0.75)*exp(-mr*omega*distance_squared/(2.0*Hbar)); 		
+					Prvv(i,j,k) = coeff*exp(-coeff2*distance_squared);
+					Pivv(i,j,k) = coeff*exp(-coeff2*distance_squared)*0.0;
+					Prv(i,j,k) = coeff*exp(-coeff2*distance_squared)*cos(-1.5*omega*Dts);
+					Piv(i,j,k) = coeff*exp(-coeff2*distance_squared)*sin(-1.5*omega*Dts);
+					
+					
+					 		
 		}}}
 
 		
@@ -109,54 +115,76 @@ void initSchrodgrid(Grid *g, PyObject *ipt){
 		}			
 		for (i=0; i<Nxs; i++){
 			for (j =0; j<Nys; j++){
-				fprintf(f,"%e\t", Vs(i,j,zc));
+				fprintf(f,"%e\t", Prvv(i,j,zc));
 		} fprintf(f,"\n");}		
 		fclose(f);
-		
+		printf("coeff = %e\ncoeff2 = %e\n", coeff, coeff2);
 	}
 	return;
 }
 
-void updatePr(Grid *g){
+void updateElectron(Grid *g){
 	
     int i,j,k,s;
 	for (s=0;s<Nsr;s++){
 		for (i = 1; i < Nxs - 1; i++){
 		    for (j = 1; j < Nys - 1; j++){
 		        for (k = 1; k < Nzs - 1; k++){
-		            Prv(i,j,k) = Pr(i,j,k);     // update Prv to time n-1/2
 		            Pr(i,j,k) = Prvv(i,j,k)     // update Pr to time n+1/2
-		                        - Lpx(i) * (Pi(i + 1,j,k) - 2 * Pi(i,j,k) + Pi(i - 1,j,k))
-		                        - Lpy(j) * (Pi(i,j + 1,k) - 2 * Pi(i,j,k) + Pi(i,j - 1,k))
-		                        - Lpz(k) * (Pi(i,j,k + 1) - 2 * Pi(i,j,k) + Pi(i,j,k - 1))
-		                        + Ppx(i) * Vs(i,j,k) * Pi(i,j,k);
-		            Prvv(i,j,k) = Prv(i,j,k);   // update Prvv to time n-1/2
+		                        - Lpx(i) * (Piv(i + 1,j,k) - 2 * Piv(i,j,k) + Piv(i - 1,j,k))
+		                        - Lpy(j) * (Piv(i,j + 1,k) - 2 * Piv(i,j,k) + Piv(i,j - 1,k))
+		                        - Lpz(k) * (Piv(i,j,k + 1) - 2 * Piv(i,j,k) + Piv(i,j,k - 1))
+		                        + Ppx(i) * Vs(i,j,k) * Piv(i,j,k);
 		        }
 		    }
 		}
-	}
-    return;
-}
-
-void updatePi(Grid *g){
-    int i,j,k,s;
-	for (s=0;s<Nsr;s++){
 		for (i = 1; i < Nxs - 1; i++){
 		    for (j = 1; j < Nys - 1; j++){
 		        for (k = 1; k < Nzs - 1; k++){
-		            Piv(i,j,k) = Pi(i,j,k);     // update Piv to time n-1/2
 		            Pi(i,j,k) = Pivv(i,j,k)     // update Pi to time n+1/2
 		                        + Lpx(i) * (Prv(i + 1,j,k) - 2 * Prv(i,j,k) + Prv(i - 1,j,k))
 		                        + Lpy(j) * (Prv(i,j + 1,k) - 2 * Prv(i,j,k) + Prv(i,j - 1,k))
 		                        + Lpz(k) * (Prv(i,j,k + 1) - 2 * Prv(i,j,k) + Prv(i,j,k - 1))
 		                        - Ppx(i) * Vs(i,j,k) * Prv(i,j,k);
+		        }
+		    }
+		}
+		for (i = 1; i < Nxs - 1; i++){
+		    for (j = 1; j < Nys - 1; j++){
+		        for (k = 1; k < Nzs - 1; k++){
+		            Prvv(i,j,k) = Prv(i,j,k);   // update Prvv to time n-1/2
+		        }
+		    }
+		}
+		for (i = 1; i < Nxs - 1; i++){
+		    for (j = 1; j < Nys - 1; j++){
+		        for (k = 1; k < Nzs - 1; k++){
 		            Pivv(i,j,k) = Piv(i,j,k);   // update Pivv to time n-1/2
 		        }
 		    }
 		}
+
+		for (i = 1; i < Nxs - 1; i++){
+		    for (j = 1; j < Nys - 1; j++){
+		        for (k = 1; k < Nzs - 1; k++){
+		            Prv(i,j,k) = Pr(i,j,k);     // update Prv to time n+1/2
+		        }
+		    }
+		}
+		for (i = 1; i < Nxs - 1; i++){
+		    for (j = 1; j < Nys - 1; j++){
+		        for (k = 1; k < Nzs - 1; k++){
+		            Piv(i,j,k) = Pi(i,j,k);     // update Piv to time n+1/2
+		        }
+		    }
+		}
+
+
 	}
+	
     return;
 }
+
 
 int frame = 0;
 
@@ -173,7 +201,7 @@ void electronSnapshot(Grid *g){
 			int zc = Nys/2;			
 			for (i=0; i<Nxs; i++){
 				for (j =0; j<Nys; j++){
-					fprintf(snapshot,"%e\t", pow(Pr(i,j,zc),2.0));
+					fprintf(snapshot,"%e\t", pow(Pr(i,j,zc),2.0)+pow(Pi(i,j,zc),2.0));
 			} fprintf(snapshot,"\n");}		
 			fclose(snapshot);
 		}

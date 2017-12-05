@@ -115,9 +115,9 @@ typedef struct Schrodgrid Schrodgrid;
 #define Pr(I,J,K)     (*g).srg[s].pr[  ((I)*Ny+J)*(Nz)+K]		// new macros start here
 #define Prv(I,J,K)    (*g).srg[s].prv[ ((I)*Ny+J)*(Nz)+K]		// beware of indices - ask!
 #define Prvv(I,J,K)   (*g).srg[s].prvv[((I)*Ny+J)*(Nz)+K]
-#define Pi(I,J,K)     (*g).srg[s].pr[  ((I)*Ny+J)*(Nz)+K]
-#define Piv(I,J,K)    (*g).srg[s].prv[ ((I)*Ny+J)*(Nz)+K]
-#define Pivv(I,J,K)   (*g).srg[s].prvv[((I)*Ny+J)*(Nz)+K]
+#define Pi(I,J,K)     (*g).srg[s].pi[  ((I)*Ny+J)*(Nz)+K]
+#define Piv(I,J,K)    (*g).srg[s].piv[ ((I)*Ny+J)*(Nz)+K]
+#define Pivv(I,J,K)   (*g).srg[s].pivv[((I)*Ny+J)*(Nz)+K]
 #define Lpx(I)    	  (*g).srg[s].lpx[I]
 #define Lpy(J)    	  (*g).srg[s].lpy[J]
 #define Lpz(K)    	  (*g).srg[s].lpz[K]
@@ -274,8 +274,8 @@ void freeMemoryVisualization(void);
 void initSchrodgrid(Grid *g, PyObject *ipt);	// new function prototypes start here
 void freeMemorySchrodgrid(Grid *g);
 void electronSnapshot(Grid *g);
-void updatePr(Grid *g);
-void updatePi(Grid *g);
+void updateElectron(Grid *g);
+
 
 
 

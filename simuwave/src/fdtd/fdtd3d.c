@@ -22,7 +22,7 @@ PyObject* run_fdtd(PyObject *ipt){
 	for (It=0; It<Nt; It++){                         
 	
 		printf("%i/%i\n",It,Nt); 		
-		electronSnapshot(g);
+		
 		
 		updateDiffH(g);
 		updateDiffHpml(g);		
@@ -32,8 +32,7 @@ PyObject* run_fdtd(PyObject *ipt){
 
 		//updateSubgrids(g);
 		
-		updatePr(g);
-		updatePi(g);
+		updateElectron(g);
 
 		updateDiffE(g);
 		//fine2coarse(g);
@@ -44,7 +43,7 @@ PyObject* run_fdtd(PyObject *ipt){
 		updateEhard(g);
  	
 		//coarse2fine(g);	
-		
+		electronSnapshot(g);
 		updateSensor(g); 
 		visualize(g);
 			
