@@ -15,9 +15,9 @@ void initSchrodgrid(Grid *g, PyObject *ipt){
 	for (s=0; s<Nsr; s++) {
 
 		// number of cells
-		Nxs = Nx;
-		Nys = Ny;
-		Nzs = Nz;
+		Nxs = 50;
+		Nys = 50;
+		Nzs = 50;
 		int xc = Nxs/2;							// center of harmonic oscillator in x direction
 		int yc = Nys/2;							// center of harmonic oscillator in y direction
 		int zc = Nys/2;							// center of harmonic oscillator in z direction
@@ -29,9 +29,9 @@ void initSchrodgrid(Grid *g, PyObject *ipt){
 		my_alloc( (*g).srg[s].dxs, Nxs, double);
 		my_alloc( (*g).srg[s].dys, Nys, double);
 		my_alloc( (*g).srg[s].dzs, Nzs, double);
-		for (i=0; i<Nxs; i++) Dxs(i) = Dx1(xc);
-		for (j=0; j<Nys; j++) Dys(j) = Dy1(yc);
-		for (k=0; k<Nzs; k++) Dzs(k) = Dz1(zc);
+		for (i=0; i<Nxs; i++) Dxs(i) = Dx1(0)/Nxs;
+		for (j=0; j<Nys; j++) Dys(j) = Dy1(0)/Nys;
+		for (k=0; k<Nzs; k++) Dzs(k) = Dz1(0)/Nzs;
 
 		printf("Cell size in center = %e x %e x %e\n",Dxs(xc),Dys(yc),Dzs(zc));
  		
