@@ -15,7 +15,9 @@ void initGrid(Grid *g, PyObject *ipt){
 	// time step
 	PyObject *py_mg = PyObject_GetAttrString( ipt, "maingrid" ); 	
 	PyObject *py_dtau = PyObject_GetAttrString( py_mg, "dtau" ); // dtau = c*dt
-	Dtau = 1e-3 * PyFloat_AS_DOUBLE(py_dtau);  // (m) -> miliseconds				
+	Dtau = 1e-3 * PyFloat_AS_DOUBLE(py_dtau);  // (m) -> miliseconds
+	//The time step is set manually for a 20nm/50 cell size in the Schrodinger grid !!!!!
+	Dtau = 1.06e-18*c0;				
 	Py_DECREF(py_dtau);
 
 	// number of cells	
@@ -172,7 +174,7 @@ void updateDiffH(Grid *g){
 void updateE(Grid *g){
 	
 	int i, j, k; 
-
+	if (It % 100 == 0) printf("\t%e\n",Ex(0,0,0));
 	for(i=0; i<Nx; i++){  
 	  for(j=0; j<Ny-1; j++){
 	    for(k=0; k<Nz-1; k++){              		

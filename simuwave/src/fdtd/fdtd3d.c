@@ -9,7 +9,6 @@ PyObject* run_fdtd(PyObject *ipt){
 	Grid *g; my_alloc(g,1,Grid);
 	
 	initGrid(g,ipt);
-	printf("Grid initialized ...\n");
 	initSchrodgrid(g, ipt);
 	initAdhie1(g,ipt);
 	initPml(g,ipt);
@@ -44,6 +43,7 @@ PyObject* run_fdtd(PyObject *ipt){
  	
 		//coarse2fine(g);	
 		electronSnapshot(g);
+		electronTimeevolution(g);
 		updateSensor(g); 
 		visualize(g);
 			

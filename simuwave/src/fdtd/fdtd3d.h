@@ -97,52 +97,42 @@ struct Schrodgrid {
 	double *pr, *prv, *prvv;	   // real part of electron wavefunction at previous steps
 	double *pi, *piv, *pivv;	   // imag part of electron wavefunction at previous steps
 	double *lpx, *lpy, *lpz;	   // laplacian term update coefficient (positive)
-	double *ppx, *ppy, *ppz;	   // potential term update coefficient (positive) -- for potential Vs AND qrE terms
-	double *vs;			   // static potential for the electron
+	double *ppx, *ppy, *ppz;	   // potential term update coefficient (positive) -- for potential Vs 
+	double *distance, *vs;		   // distance to center and static potential for the electron
 	double *dxs, *dys, *dzs;	   // schrodinger grid steps -- may be the same as for Maxwell
-	double *ex, *ey, *ez;		   // electric field unknowns
-	double *hx, *hy, *hz;		   // magnetic field unknowns
 	double *jx, *jy, *jz;		   // Quantum current unknowns
-	double *cex, *cey, *cez;           // electric-field capacity update coefficient
-	double *chx, *chy, *chz;           // magnetic-field capacity update coefficient
-	double nx, ny, nz, nt, it; 	   //
+	int nx, ny, nz, nt, it; 	   //
 	double dts;			   // timestep for Schrodinger, may be the same as for Maxwell
 
 };
 typedef struct Schrodgrid Schrodgrid;
 
 // macros for accessing properties of the Schrodgrid
-#define Pr(I,J,K)     (*g).srg[s].pr[  ((I)*Ny+J)*(Nz)+K]		// new macros start here
-#define Prv(I,J,K)    (*g).srg[s].prv[ ((I)*Ny+J)*(Nz)+K]		// beware of indices - ask!
-#define Prvv(I,J,K)   (*g).srg[s].prvv[((I)*Ny+J)*(Nz)+K]
-#define Pi(I,J,K)     (*g).srg[s].pi[  ((I)*Ny+J)*(Nz)+K]
-#define Piv(I,J,K)    (*g).srg[s].piv[ ((I)*Ny+J)*(Nz)+K]
-#define Pivv(I,J,K)   (*g).srg[s].pivv[((I)*Ny+J)*(Nz)+K]
-#define Lpx(I)    	  (*g).srg[s].lpx[I]
-#define Lpy(J)    	  (*g).srg[s].lpy[J]
-#define Lpz(K)    	  (*g).srg[s].lpz[K]
-#define Ppx(I)	      (*g).srg[s].ppx[I]
-#define Ppy(J)  	  (*g).srg[s].ppy[J]
-#define Ppz(K)  	  (*g).srg[s].ppz[K]
-#define Vs(I,J,K)     (*g).srg[s].vs[((I)*Ny+J)*(Nz)+K]
 #define Dxs(I)	      (*g).srg[s].dxs[I]
 #define Dys(J)	      (*g).srg[s].dys[J]
 #define Dzs(K)	      (*g).srg[s].dzs[K]
-#define Exs(I,J,K)    (*g).srg[s].ex[  ((I)*(Ny+1)+J)*(Nz+1)+K]
-#define Eys(I,J,K)    (*g).srg[s].ey[  ((I)*(Ny+1)+J)*(Nz+1)+K]
-#define Ezs(I,J,K)    (*g).srg[s].ez[  ((I)*(Ny+1)+J)*(Nz+1)+K]
-#define Cexs(I,J,K)   (*g).srg[s].cex[ ((I)*(Ny-1)+J)*(Nz-1)+K]
-#define Ceys(I,J,K)   (*g).srg[s].cey[ ((I)*(Ny)+J)*(Nz-1)+K]
-#define Cezs(I,J,K)   (*g).srg[s].cez[ ((I)*(Ny-1)+J)*(Nz)+K]
-#define Chxs(I,J,K)   (*g).srg[s].chx[ ((I)*Ny+J)*Nz+K]
-#define Chys(I,J,K)   (*g).srg[s].chy[ ((I)*(Ny-1)+J)*Nz+K]
-#define Chzs(I,J,K)   (*g).srg[s].chz[ ((I)*Ny+J)*(Nz-1)+K]
 #define Nxs			  (*g).srg[s].nx
 #define Nys			  (*g).srg[s].ny
 #define Nzs			  (*g).srg[s].nz
 #define Nts			  (*g).srg[s].nt
 #define Its			  (*g).srg[s].it
 #define Dts			  (*g).srg[s].dts
+#define Pr(I,J,K)     (*g).srg[s].pr[  ((I)*Nys+J)*(Nzs)+K]		
+#define Prv(I,J,K)    (*g).srg[s].prv[ ((I)*Nys+J)*(Nzs)+K]		
+#define Prvv(I,J,K)   (*g).srg[s].prvv[((I)*Nys+J)*(Nzs)+K]
+#define Pi(I,J,K)     (*g).srg[s].pi[  ((I)*Nys+J)*(Nzs)+K]
+#define Piv(I,J,K)    (*g).srg[s].piv[ ((I)*Nys+J)*(Nzs)+K]
+#define Pivv(I,J,K)   (*g).srg[s].pivv[((I)*Nys+J)*(Nzs)+K]
+#define Lpx(I)    	  (*g).srg[s].lpx[I]
+#define Lpy(J)    	  (*g).srg[s].lpy[J]
+#define Lpz(K)    	  (*g).srg[s].lpz[K]
+#define Ppx(I)	      (*g).srg[s].ppx[I]
+#define Ppy(J)  	  (*g).srg[s].ppy[J]
+#define Ppz(K)  	  (*g).srg[s].ppz[K]
+#define Vs(I,J,K)     (*g).srg[s].vs[((I)*Nys+J)*(Nzs)+K]
+#define Dist(I,J,K)	  (*g).srg[s].distance[((I)*Nys+J)*(Nzs)+K]
+
+
 
 struct Grid {
 	double *ex, *ey, *ez;              // electric-field unknowns
@@ -275,6 +265,7 @@ void initSchrodgrid(Grid *g, PyObject *ipt);	// new function prototypes start he
 void freeMemorySchrodgrid(Grid *g);
 void electronSnapshot(Grid *g);
 void updateElectron(Grid *g);
+void electronTimeevolution(Grid *g);
 
 
 
