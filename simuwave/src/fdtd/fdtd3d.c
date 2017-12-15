@@ -32,14 +32,18 @@ PyObject* run_fdtd(PyObject *ipt){
 		//updateSubgrids(g);
 		
 		updateElectron(g);
+		updateQCurrent(g);
 
 		updateDiffE(g);
 		//fine2coarse(g);
 		updateDiffEcurrent(g);	
+
 		updateDiffEpml(g);
 		updateDiffEadhie(g);		
 		updateE(g);	
 		updateEhard(g);
+
+		addQCurrent(g);
  	
 		//coarse2fine(g);	
 		electronSnapshot(g);

@@ -1334,7 +1334,7 @@ class MainWindow(QtGui.QMainWindow):
 					g.edges[0] = h5f['edge_x_'+str(i)][:]						
 					g.edges[1] = h5f['edge_y_'+str(i)][:]		
 					g.edges[2] = h5f['edge_z_'+str(i)][:]	
-					g.matmap = h5f['matmap_'+str(i)][:]	 		
+					g.matmap = list(h5f['matmap_'+str(i)][:])	 		
 					g.matlut = [tuple(l) for l in h5f['matlut_'+str(i)][:]]
 				        g.add_bounds()
 					g.add_steps()

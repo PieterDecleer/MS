@@ -97,11 +97,13 @@ struct Schrodgrid {
 	double *pr, *prv, *prvv;	   // real part of electron wavefunction at previous steps
 	double *pi, *piv, *pivv;	   // imag part of electron wavefunction at previous steps
 	double *lpx, *lpy, *lpz;	   // laplacian term update coefficient (positive)
-	double *ppx, *ppy, *ppz;	   // potential term update coefficient (positive) -- for potential Vs 
-	double *distance, *vs;		   // distance to center and static potential for the electron
+	double *ppx, *ppy, *ppz;	   // static potential term update coefficient (positive)
+	double *epx, *epy, *epz;	   // electric potential update coefficient (postive) 
+	double *vs;		   			   // static potential for the electron
 	double *dxs, *dys, *dzs;	   // schrodinger grid steps -- may be the same as for Maxwell
 	double *jx, *jy, *jz;		   // Quantum current unknowns
-	int nx, ny, nz, nt, it; 	   //
+	double *exs, *eys, *ezs;	   // Electric field averaged
+	int nx, ny, nz, nt, it; 	   // number of cells, number of time steps, current time steps
 	double dts;			   // timestep for Schrodinger, may be the same as for Maxwell
 
 };
@@ -129,8 +131,16 @@ typedef struct Schrodgrid Schrodgrid;
 #define Ppx(I)	      (*g).srg[s].ppx[I]
 #define Ppy(J)  	  (*g).srg[s].ppy[J]
 #define Ppz(K)  	  (*g).srg[s].ppz[K]
+#define Epx(I)	      (*g).srg[s].epx[I]
+#define Epy(J)  	  (*g).srg[s].epy[J]
+#define Epz(K)  	  (*g).srg[s].epz[K]
 #define Vs(I,J,K)     (*g).srg[s].vs[((I)*Nys+J)*(Nzs)+K]
-#define Dist(I,J,K)	  (*g).srg[s].distance[((I)*Nys+J)*(Nzs)+K]
+#define Jxs(I,J,K)	  (*g).srg[s].jx[((I)*Nys+J)*(Nzs)+K]
+#define Jys(I,J,K)	  (*g).srg[s].jy[((I)*Nys+J)*(Nzs)+K]
+#define Jzs(I,J,K)	  (*g).srg[s].jz[((I)*Nys+J)*(Nzs)+K]
+#define Exs(I,J,K)	  (*g).srg[s].exs[((I)*Nys+J)*(Nzs)+K]
+#define Eys(I,J,K)	  (*g).srg[s].eys[((I)*Nys+J)*(Nzs)+K]
+#define Ezs(I,J,K)	  (*g).srg[s].ezs[((I)*Nys+J)*(Nzs)+K]
 
 
 
@@ -266,6 +276,9 @@ void freeMemorySchrodgrid(Grid *g);
 void electronSnapshot(Grid *g);
 void updateElectron(Grid *g);
 void electronTimeevolution(Grid *g);
+
+void updateQCurrent(Grid *g);
+void addQCurrent(Grid *g);
 
 
 
